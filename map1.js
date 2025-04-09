@@ -16,7 +16,7 @@ let pieData = {};
 d3.csv("bar_allergy_data.csv").then(barCsv => {
   barCsv.forEach(d => {
     barData[d.State] = {
-      Egg: +d.Eggw,
+      Egg: +d.Eggs,
       Dairy: +d.Diary,
       Peanuts: +d.Peanuts,
       Seafood: +d.Seafood,
