@@ -30,14 +30,44 @@
     .bar:hover {
       fill: orange;
     }
+
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center; 
+      align-items: flex-start; 
+      min-height: 100vh;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      grid-gap: 20px;
+      justify-items: center;
+      align-items: start;
+      padding: 40px;
+      border: 2px solid black;
+    }
+
+    #map {
+      grid-column: 1 / span 2;
+    }
+
+    h1{
+      justify-content: center; 
+    }
   </style>
 </head>
 <body>
-  <svg id="map" width="960" height="600"></svg>
-  <svg id="barchart" width="500" height="300"></svg>
-  <div id="piechart"></div>
-  <div class="tooltip"></div>
-
+  
+  <div id="container" class="container">
+    <h1>US Food Allergy</h1>
+    <svg id="map" width="960" height="600"></svg>
+    <svg id="barchart" width="500" height="300"></svg>
+    <svg id="piechart" width="500" height="300"></svg>
+    <div class="tooltip"></div>
+  </div>
   <script src="map1.js"></script>
 </body>
 </html>
