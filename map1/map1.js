@@ -8,7 +8,7 @@ const projection = d3.geoAlbersUsa()
   .scale(1400);
 
 const colorScale = d3.scaleLinear()
-  .domain([40, 70, 100])  // we can adjust the domain based on the number of cites/scores
+  .domain([45, 70, 100])  // we can adjust the domain based on the number of cites/scores
   .range(["#1a9850", "#f7590a","#e6261c"]);  // red → orange → green
 
 
