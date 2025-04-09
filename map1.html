@@ -6,6 +6,24 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
   <style>
+    .state {
+      fill: #44e62f;
+      stroke: #fff;
+      stroke-width: 2;
+    }
+    .state:hover {
+      fill: orange;
+    }
+    .tooltip {
+      position: absolute;
+      background: #333;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      pointer-events: none;
+      font-size: 14px;
+      opacity: 0;
+    }
   </style>
 </head>
 <body>
