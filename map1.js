@@ -18,7 +18,7 @@ let barData = {};
 let pieData = {};
 
 // Load bar data
-d3.csv("bar_allergy_data.csv").then(barCsv => {
+d3.csv("dataset/bar_allergy_data.csv").then(barCsv => {
   barCsv.forEach(d => {
     barData[d.State] = {
       Egg: +d.Eggs,
@@ -31,7 +31,7 @@ d3.csv("bar_allergy_data.csv").then(barCsv => {
   });
 
   // Load pie data
-  d3.csv("pie_allergy_data.csv").then(pieCsv => {
+  d3.csv("dataset/pie_allergy_data.csv").then(pieCsv => {
     pieCsv.forEach(d => {
       pieData[d.State] = {
         Eggs: +d.Eggs,
@@ -71,7 +71,7 @@ d3.csv("bar_allergy_data.csv").then(barCsv => {
 });
 
 // Load city allergy scores with coordinates
-d3.csv("city_allergy_scores_with_coords.csv").then(cityData => {
+d3.csv("dataset/total_pollen_score_ranking.csv").then(cityData => {
   cityData.forEach(d => {
     d.Score = +d.Score;
     d.Rank = +d.Rank;
@@ -165,9 +165,9 @@ function drawLegend() {
 
   linearGradient.selectAll("stop")
     .data([
-      { offset: "0%", color: "#d73027" },  // Worse
-      { offset: "50%", color: "#fdae61" }, // Average
-      { offset: "100%", color: "#1a9850" } // Better
+      { offset: "0%", color: "#e6261c" },  // Better
+      { offset: "50%", color: "#f7590a" }, // Average
+      { offset: "100%", color: "#1a9850" } // Worse
     ])
     .enter().append("stop")
     .attr("offset", d => d.offset)
