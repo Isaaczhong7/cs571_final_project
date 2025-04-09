@@ -98,7 +98,7 @@ function drawBarChart(state, data) {
     .attr("y", margin.top)
     .attr("text-anchor", "middle")
     .style("font-size", "16px")
-    .text(`The percentage of food allergy with anaphylaxis diagnosis in ${state}`);
+    .text(`Food Allergy (Bar) in ${state}`);
 }
 
 // Pie chart
@@ -119,26 +119,35 @@ function drawPieChart(state, data) {
     .domain(Object.keys(data))
     .range(d3.schemeCategory10);
 
-  const pie = d3.pie().value(d => d[1]);
-  const data_ready = pie(Object.entries(data));
+  const pie = d3.pie()
+    .sort(null)
+    .value(d => d[1]);
 
+  const data_ready = pie(Object.entries(data));
   const arc = d3.arc().innerRadius(0).outerRadius(radius);
 
-  svg.selectAll('path')
+  const tooltip = d3.select(".tooltip");
+
+  svg.selectAll("path")
     .data(data_ready)
-    .join('path')
-    .attr('d', arc)
-    .attr('fill', d => color(d.data[0]))
+    .join("path")
+    .attr("d", arc)
+    .attr("fill", d => color(d.data[0]))
     .attr("stroke", "#fff")
-    .style("stroke-width", "2px");
+    .style("stroke-width", "2px")
+    .on("mouseover", (event, d) => {
+      tooltip.transition().duration(200).style("opacity", 0.9);
+      tooltip.html(`${d.data[0]}: ${(d.data[1] * 100).toFixed(2)}%`)
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY - 20) + "px");
+    })
+    .on("mousemove", event => {
+      tooltip.style("left", (event.pageX + 10) + "px")
+             .style("top", (event.pageY - 20) + "px");
+    })
+    .on("mouseout", () => {
+      tooltip.transition().duration(500).style("opacity", 0);
+    });
 
-  svg.selectAll("text")
-    .data(data_ready)
-    .enter()
-    .append("text")
-    .text(d => `${d.data[0]}`)
-    .attr("transform", d => `translate(${arc.centroid(d)})`)
-    .style("font-size", "12px");
-
-  pieContainer.append("h3").text(`Food Allergy pie in ${state}`);
+  pieContainer.append("h3").text(`Top 5 Food Allergy substance in ${state}`);
 }
