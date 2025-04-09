@@ -107,5 +107,5 @@ function drawBarChart(state, data) {
     .attr("y", margin.top - 5)
     .attr("text-anchor", "middle")
     .style("font-size", "16px")
-    .text(`Food Allergy Stats in ${state}`);
+    .text(`The percentage of food allergy with anaphylaxis diagnosis in ${state}`);
 }
