@@ -70,6 +70,15 @@ function drawBarChart(state, data) {
   const margin = { top: 20, right: 20, bottom: 40, left: 60 };
   const width = 500 - margin.left - margin.right;
   const height = 300 - margin.top - margin.bottom;
+  const titleContainer = d3.select("#barTitle");
+  
+  titleContainer.selectAll("*").remove();   
+
+  titleContainer.append("h3")
+    .text(`The precentage of Food Allergy with anaphylaxis in ${state}`)
+    .style("font-size", "20px")
+    .style("text-align", "center")
+    .style("margin-bottom", "10px");
 
   barSvg.selectAll("*").remove();
   const g = barSvg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
@@ -93,61 +102,63 @@ function drawBarChart(state, data) {
   g.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
   g.append("g").call(d3.axisLeft(y));
 
-  barSvg.append("text")
-    .attr("x", width / 2 + margin.left)
-    .attr("y", margin.top)
-    .attr("text-anchor", "middle")
-    .style("font-size", "16px")
-    .text(`Food Allergy (Bar) in ${state}`);
 }
 
 // Pie chart
 function drawPieChart(state, data) {
-  pieContainer.selectAll("*").remove();
-
-  const width = 300;
-  const height = 300;
-  const radius = Math.min(width, height) / 2;
-
-  const svg = pieContainer.append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .append("g")
-    .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
-  const color = d3.scaleOrdinal()
-    .domain(Object.keys(data))
-    .range(d3.schemeCategory10);
-
-  const pie = d3.pie()
-    .sort(null)
-    .value(d => d[1]);
-
-  const data_ready = pie(Object.entries(data));
-  const arc = d3.arc().innerRadius(0).outerRadius(radius);
-
-  const tooltip = d3.select(".tooltip");
-
-  svg.selectAll("path")
-    .data(data_ready)
-    .join("path")
-    .attr("d", arc)
-    .attr("fill", d => color(d.data[0]))
-    .attr("stroke", "#fff")
-    .style("stroke-width", "2px")
-    .on("mouseover", (event, d) => {
-      tooltip.transition().duration(200).style("opacity", 0.9);
-      tooltip.html(`${d.data[0]}: ${(d.data[1] * 100).toFixed(2)}%`)
-        .style("left", (event.pageX + 10) + "px")
-        .style("top", (event.pageY - 20) + "px");
-    })
-    .on("mousemove", event => {
-      tooltip.style("left", (event.pageX + 10) + "px")
-             .style("top", (event.pageY - 20) + "px");
-    })
-    .on("mouseout", () => {
-      tooltip.transition().duration(500).style("opacity", 0);
-    });
-
-  pieContainer.append("h3").text(`Top 5 Food Allergy substance in ${state}`);
-}
+    const pieContainer = d3.select("#piechart");
+    const titleContainer = d3.select("#pieTitle");
+  
+    pieContainer.selectAll("*").remove();       // clear previous chart
+    titleContainer.selectAll("*").remove();     // clear previous title
+  
+    titleContainer.append("h3")
+      .text(`Top 5 Food Allergy Substances in ${state}`)
+      .style("font-size", "20px")
+      .style("text-align", "center")
+      .style("margin-bottom", "10px");
+  
+    const width = 300;
+    const height = 300;
+    const radius = Math.min(width, height) / 2;
+  
+    const svg = pieContainer
+      .attr("width", width)
+      .attr("height", height)
+      .append("g")
+      .attr("transform", `translate(${width / 2}, ${height / 2})`);
+  
+    const color = d3.scaleOrdinal()
+      .domain(Object.keys(data))
+      .range(d3.schemeCategory10);
+  
+    const pie = d3.pie()
+      .sort(null)
+      .value(d => d[1]);
+  
+    const data_ready = pie(Object.entries(data));
+    const arc = d3.arc().innerRadius(0).outerRadius(radius);
+    const tooltip = d3.select(".tooltip");
+  
+    svg.selectAll("path")
+      .data(data_ready)
+      .join("path")
+      .attr("d", arc)
+      .attr("fill", d => color(d.data[0]))
+      .attr("stroke", "#fff")
+      .style("stroke-width", "2px")
+      .on("mouseover", (event, d) => {
+        tooltip.transition().duration(200).style("opacity", 0.9);
+        tooltip.html(`${d.data[0]}: ${(d.data[1] * 100).toFixed(2)}%`)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 20) + "px");
+      })
+      .on("mousemove", event => {
+        tooltip.style("left", (event.pageX + 10) + "px")
+               .style("top", (event.pageY - 20) + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.transition().duration(500).style("opacity", 0);
+      });
+  }
+  

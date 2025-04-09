@@ -94,8 +94,14 @@
   <div id="container" class="container">
     
     <svg id="map" width="960" height="600"></svg>
-    <svg id="barchart" width="500" height="300"></svg>
-    <svg id="piechart" width="500" height="300"></svg>
+    <div id="barWrapper">
+        <div id="barTitle"></div>
+        <svg id="barchart" width="500" height="300"></svg>
+      </div>
+    <div id="pieWrapper">
+        <div id="pieTitle"></div>
+        <svg id="piechart" width="500" height="300"></svg>
+      </div>
     <div class="tooltip"></div>
   </div>
   <script src="map1.js"></script>
