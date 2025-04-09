@@ -4,11 +4,11 @@ const tooltip = d3.select(".tooltip");
 const pieContainer = d3.select("#piechart");
 
 const projection = d3.geoAlbersUsa()
-  .translate([960 / 2, 500 / 2])
-  .scale(1000);
+  .translate([1100 / 2, 600 / 2])
+  .scale(1400);
 
 const colorScale = d3.scaleLinear()
-  .domain([60, 80, 100])  // we can adjust the domain based on the number of cites/scores
+  .domain([40, 70, 100])  // we can adjust the domain based on the number of cites/scores
   .range(["#1a9850", "#f7590a","#e6261c"]);  // red → orange → green
 
 
@@ -149,7 +149,7 @@ function drawLegend() {
     .attr("height", 70)
     .style("margin-top", "10px");
 
-  // 🔠 Title
+  // Title
   legendSvg.append("text")
     .attr("x", (legendWidth + 100) / 2)
     .attr("y", 15)
@@ -158,7 +158,7 @@ function drawLegend() {
     .style("font-weight", "bold")
     .style("text-anchor", "middle");
 
-  // 🎨 Gradient
+  // Gradient
   const defs = legendSvg.append("defs");
   const linearGradient = defs.append("linearGradient")
     .attr("id", "legend-gradient");
@@ -173,7 +173,7 @@ function drawLegend() {
     .attr("offset", d => d.offset)
     .attr("stop-color", d => d.color);
 
-  // ▬ Gradient bar
+  // Gradient bar
   legendSvg.append("rect")
     .attr("x", 50)
     .attr("y", 30)
@@ -181,7 +181,7 @@ function drawLegend() {
     .attr("height", legendHeight)
     .style("fill", "url(#legend-gradient)");
 
-  // 🏷 Labels
+  // Labels
   legendSvg.append("text")
     .attr("x", 40)
     .attr("y", 28)
