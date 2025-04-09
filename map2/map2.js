@@ -9,7 +9,7 @@ const projection = d3.geoAlbersUsa()
 const path = d3.geoPath().projection(projection);
 let ageData = {};
 
-d3.csv("age_groups.csv").then(ageCsv => {
+d3.csv("../dataset/age_groups.csv").then(ageCsv => {
     ageCsv.forEach(d => {
       ageData[d.state] = {
         "Age 0-13": +d.age_0_13,

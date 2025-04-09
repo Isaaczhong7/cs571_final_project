@@ -18,7 +18,7 @@ let barData = {};
 let pieData = {};
 
 // Load bar data
-d3.csv("dataset/bar_allergy_data.csv").then(barCsv => {
+d3.csv("../dataset/bar_allergy_data.csv").then(barCsv => {
   barCsv.forEach(d => {
     barData[d.State] = {
       Egg: +d.Eggs,
@@ -31,7 +31,7 @@ d3.csv("dataset/bar_allergy_data.csv").then(barCsv => {
   });
 
   // Load pie data
-  d3.csv("dataset/pie_allergy_data.csv").then(pieCsv => {
+  d3.csv("../dataset/pie_allergy_data.csv").then(pieCsv => {
     pieCsv.forEach(d => {
       pieData[d.State] = {
         Eggs: +d.Eggs,
@@ -71,7 +71,7 @@ d3.csv("dataset/bar_allergy_data.csv").then(barCsv => {
 });
 
 // Load city allergy scores with coordinates
-d3.csv("dataset/total_pollen_score_ranking.csv").then(cityData => {
+d3.csv("../dataset/total_pollen_score_ranking.csv").then(cityData => {
   cityData.forEach(d => {
     d.Score = +d.Score;
     d.Rank = +d.Rank;
