@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>US food allergy</title>
+  <title>US Map + Allergy Bar Chart</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
   <style>
     .state {
-      fill: #44e62f;
+      fill: #18e040;
       stroke: #fff;
-      stroke-width: 2;
+      stroke-width: 1;
     }
     .state:hover {
       fill: orange;
@@ -24,13 +24,21 @@
       font-size: 14px;
       opacity: 0;
     }
+    .bar {
+      fill: steelblue;
+    }
+    .bar:hover {
+      fill: orange;
+    }
   </style>
 </head>
 <body>
-  <h>US food allergy</h>
-  <svg width="1000" height="500"></svg>
+  <svg id="map" width="960" height="600"></svg>
+  <svg id="barchart" width="500" height="300"></svg>
   <div class="tooltip"></div>
+
   <script src="map1.js"></script>
 </body>
 </html>
+
 
