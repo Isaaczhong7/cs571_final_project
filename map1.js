@@ -4,8 +4,13 @@ const tooltip = d3.select(".tooltip");
 const pieContainer = d3.select("#piechart");
 
 const projection = d3.geoAlbersUsa()
-  .translate([960 / 2, 600 / 2])
+  .translate([960 / 2, 500 / 2])
   .scale(1000);
+
+const colorScale = d3.scaleLinear()
+  .domain([60, 80, 100])  // we can adjust the domain based on the number of cites/scores
+  .range(["#1a9850", "#f7590a","#e6261c"]);  // red → orange → green
+
 
 const path = d3.geoPath().projection(projection);
 
@@ -64,6 +69,143 @@ d3.csv("bar_allergy_data.csv").then(barCsv => {
     });
   });
 });
+
+// Load city allergy scores with coordinates
+d3.csv("city_allergy_scores_with_coords.csv").then(cityData => {
+  cityData.forEach(d => {
+    d.Score = +d.Score;
+    d.Rank = +d.Rank;
+    d.Lat = +d.Lat;
+    d.Lon = +d.Lon;
+  });
+
+  // Append city circles after map is drawn
+  d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(us => {
+    const states = topojson.feature(us, us.objects.states).features;
+
+    svg.selectAll("path")
+      .data(states)
+      .enter()
+      .append("path")
+      .attr("d", path)
+      .attr("class", "state")
+      .on("mouseover", function (event, d) {
+        tooltip.transition().duration(200).style("opacity", 0.9);
+        tooltip.html(d.properties.name)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 20) + "px");
+      })
+      .on("mouseout", function () {
+        tooltip.transition().duration(500).style("opacity", 0);
+      })
+      .on("click", (event, d) => {
+        const stateName = d.properties.name;
+        if (barData[stateName]) drawBarChart(stateName, barData[stateName]);
+        if (pieData[stateName]) drawPieChart(stateName, pieData[stateName]);
+      });
+
+    // Draw circles for cities
+    svg.selectAll("circle.city")
+      .data(cityData)
+      .enter()
+      .append("circle")
+      .attr("class", "city")
+      .attr("cx", d => {
+        const coords = projection([d.Lon, d.Lat]);
+        return coords ? coords[0] : null;
+      })
+      .attr("cy", d => {
+        const coords = projection([d.Lon, d.Lat]);
+        return coords ? coords[1] : null;
+      })
+      .attr("r", 5)
+      .attr("fill", d => colorScale(d.Score))
+      .attr("stroke", "white")
+      .attr("stroke-width", 1.5)
+      .on("mouseover", function (event, d) {
+        tooltip.transition().duration(200).style("opacity", 0.9);
+        tooltip.html(
+          `<strong>${d.City}, ${d.State}</strong><br>
+           Rank: ${d.Rank}<br>
+           Total Pollen Score: ${d.Score}`
+        )
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 20) + "px");
+      })
+      .on("mouseout", function () {
+        tooltip.transition().duration(500).style("opacity", 0);
+      });
+      drawLegend();
+  });
+});
+function drawLegend() {
+  const legendWidth = 300;
+  const legendHeight = 10;
+  const legendContainer = d3.select("#legendContainer");
+
+  const legendSvg = legendContainer
+    .append("svg")
+    .attr("width", legendWidth + 100)
+    .attr("height", 70)
+    .style("margin-top", "10px");
+
+  // 🔠 Title
+  legendSvg.append("text")
+    .attr("x", (legendWidth + 100) / 2)
+    .attr("y", 15)
+    .text("Total Pollen Score")
+    .style("font-size", "16px")
+    .style("font-weight", "bold")
+    .style("text-anchor", "middle");
+
+  // 🎨 Gradient
+  const defs = legendSvg.append("defs");
+  const linearGradient = defs.append("linearGradient")
+    .attr("id", "legend-gradient");
+
+  linearGradient.selectAll("stop")
+    .data([
+      { offset: "0%", color: "#d73027" },  // Worse
+      { offset: "50%", color: "#fdae61" }, // Average
+      { offset: "100%", color: "#1a9850" } // Better
+    ])
+    .enter().append("stop")
+    .attr("offset", d => d.offset)
+    .attr("stop-color", d => d.color);
+
+  // ▬ Gradient bar
+  legendSvg.append("rect")
+    .attr("x", 50)
+    .attr("y", 30)
+    .attr("width", legendWidth)
+    .attr("height", legendHeight)
+    .style("fill", "url(#legend-gradient)");
+
+  // 🏷 Labels
+  legendSvg.append("text")
+    .attr("x", 40)
+    .attr("y", 28)
+    .text("Worse")
+    .style("fill", "#d73027")
+    .style("font-size", "12px");
+
+  legendSvg.append("text")
+    .attr("x", legendWidth / 2 + 50)
+    .attr("y", 28)
+    .text("Average")
+    .style("fill", "#fdae61")
+    .style("font-size", "12px")
+    .style("text-anchor", "middle");
+
+  legendSvg.append("text")
+    .attr("x", legendWidth + 60)
+    .attr("y", 28)
+    .text("Better")
+    .style("fill", "#1a9850")
+    .style("font-size", "12px");
+}
+
+
 
 // Bar chart
 function drawBarChart(state, data) {
