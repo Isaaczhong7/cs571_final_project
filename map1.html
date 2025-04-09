@@ -33,7 +33,6 @@
 
     body {
       margin: 0;
-      display: flex;
       justify-content: center; 
       align-items: flex-start; 
       min-height: 100vh;
@@ -57,12 +56,43 @@
     h1{
       justify-content: center; 
     }
+    .navbar {
+        width: 100%;
+        background-color: #333;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        padding: 14px 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .navbar a {
+        color: white;
+        text-decoration: none;
+        font-size: 18px;
+        padding: 8px 16px;
+        border-radius: 4px;
+    }
+
+.navbar a:hover {
+  background-color: #575757;
+}
   </style>
 </head>
 <body>
-  
+    <nav class="navbar">
+        <a href="index.html">Home</a>
+        <a href="map1.html">map1</a>
+        <a href="map2.html">map2</a>
+        <a href="map3.html">map3</a>
+        
+      </nav>
+      <center><h1>US Food Allergy</h1></center>
   <div id="container" class="container">
-    <h1>US Food Allergy</h1>
+    
     <svg id="map" width="960" height="600"></svg>
     <svg id="barchart" width="500" height="300"></svg>
     <svg id="piechart" width="500" height="300"></svg>
