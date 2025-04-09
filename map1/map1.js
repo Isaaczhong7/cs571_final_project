@@ -217,7 +217,7 @@ function drawBarChart(state, data) {
   titleContainer.selectAll("*").remove();   
 
   titleContainer.append("h3")
-    .text(`The precentage of Food Allergy with anaphylaxis in ${state}`)
+    .text(`The precentage of food allergy group with anaphylaxis in ${state}`)
     .style("font-size", "20px")
     .style("text-align", "center")
     .style("margin-bottom", "10px");
