@@ -1,10 +1,9 @@
-
 const svg = d3.select("#map");
 const tooltip = d3.select(".tooltip");
 
 const projection = d3.geoAlbersUsa()
-  .translate([960 / 2, 600 / 2])
-  .scale(1000);
+  .translate([1400 / 2, 700 / 2])
+  .scale(1400);
 
 const path = d3.geoPath().projection(projection);
 let ageData = {};
@@ -16,6 +15,34 @@ d3.csv("../dataset/age_groups.csv").then(ageCsv => {
         "Age 14-40": +d.age_14_40,
         "Age 41-older": +d.age_41_older
       };
+    });
+
+    // Create and populate data table
+    const tableBody = d3.select("#ageDataTable tbody");
+    
+    // Convert ageData object to array and sort alphabetically by state name
+    const tableData = Object.entries(ageData)
+        .map(([state, values]) => ({ state, ...values }))
+        .sort((a, b) => a.state.localeCompare(b.state));
+    
+    tableBody.selectAll("tr")
+        .data(tableData)
+        .enter()
+        .append("tr")
+        .html(d => `
+            <td>${d.state}</td>
+            <td>${d["Age 0-13"]}%</td>
+            <td>${d["Age 14-40"]}%</td>
+            <td>${d["Age 41-older"]}%</td>
+        `);
+
+    // Add toggle functionality
+    d3.select("#showTableBtn").on("click", function() {
+        const tableContainer = d3.select("#dataTableContainer");
+        const isVisible = tableContainer.style("display") !== "none";
+        
+        tableContainer.style("display", isVisible ? "none" : "block");
+        d3.select(this).text(isVisible ? "Show Data Table" : "Hide Data Table");
     });
 });
 

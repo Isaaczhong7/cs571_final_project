@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>US Map + Allergy Bar Chart</title>
+  <title>US Map + Allergy By Group</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
   <style>
@@ -24,11 +24,12 @@
       font-size: 14px;
       opacity: 0;
     }
-    body {
-      margin: 0;
+    map {
+      grid-column: 1 / span 2;
+    }
+
+    h1{
       justify-content: center; 
-      align-items: flex-start; 
-      min-height: 100vh;
     }
     .navbar {
         width: 100%;
@@ -54,20 +55,93 @@
     .navbar a:hover {
       background-color: #575757;
     }
+
+
+    #showTableBtn {
+        position: absolute;
+        top: 550px;
+        left: 1600px;
+        padding: 8px 16px;
+        background: #0066cc;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    #showTableBtn:hover {
+        background: #004d99;
+    }
+
+    #dataTableContainer {
+        position: absolute;
+        top: 600px;
+        left: 1200px;
+        background: white;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 10;
+    }
+
+    #ageDataTable {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    #ageDataTable th, #ageDataTable td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    #ageDataTable th {
+        background-color: #f2f2f2;
+        top: 0;
+    }
+
+    #ageDataTable tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
 </style>
 </head>
-<body> 
+<body>
   <nav class="navbar">
     <a href="../index.html">Home</a>
     <a href="../map1/map1.html">Map1</a>
     <a href="../map2/map2.html">Map2</a>
     <a href="../map3/map3.html">Map3</a>
   </nav>
-  
-    <svg id="map" width="960" height="600"></svg>
-    <div class="tooltip"></div>
+
+    <center><h1>Allergies in the US by Age Group</h1></center>
+  <div id="container" class="container">
+      <svg id="map" width="2000" height="1000"></svg>
+
+      <button id="showTableBtn">Show Data Table</button>
+
+      <div id="dataTableContainer" style="display: none;">
+          <h3 align="center">Age Group Data</h3>
+          <table id="ageDataTable">
+              <thead>
+                  <tr>
+                      <th>State</th>
+                      <th>Age 0-13</th>
+                      <th>Age 14-40</th>
+                      <th>Age 41-older</th>
+                  </tr>
+              </thead>
+              <tbody></tbody>
+          </table>
+      </div>
+      
+      <div class="tooltip"></div>
+    </div>
 
     <script src="map2.js"></script>
+
 </body>
 </html>
 
