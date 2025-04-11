@@ -41,7 +41,7 @@ let allStates = [];
 
 Promise.all([
   d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"),
-  d3.csv("dataset/state_claims_data.csv")
+  d3.csv("../dataset/state_claims_data.csv")
 ]).then(([us, data]) => {
   const nameToChange = new Map(data.map(d => [d.State, +d.percent_change]));
   allStates = data.map(d => d.State).sort();
@@ -118,7 +118,7 @@ Promise.all([
           const scale = Math.min(2.5, value / 100);
           svg.append("image")
             .attr("class", "germ")
-            .attr("xlink:href", "assets/germ.svg")
+            .attr("xlink:href", "../assets/germ.svg")
             .attr("x", x - 10 * scale)
             .attr("y", y - 10 * scale)
             .attr("width", 20 * scale)
