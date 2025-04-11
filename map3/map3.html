@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>USA Choropleth Map</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v3.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: white;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding-bottom: 30px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .controls label {
+      font-weight: bold;
+      margin-right: 5px;
+    }
+
+    .state {
+      stroke: #fff;
+      stroke-width: 0.5;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #333;
+      padding: 5px;
+      font-size: 12px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>USA Claims % Change Choropleth</h2>
+  <div class="container">
+    <div class="controls">
+      <div>
+        <label for="regionSelect">Region:</label>
+        <select id="regionSelect">
+          <option value="All">All Regions</option>
+        </select>
+      </div>
+      <div>
+        <label for="stateSelect">State:</label>
+        <select id="stateSelect">
+          <option value="All">All States</option>
+        </select>
+      </div>
+      <div>
+        <label><input type="checkbox" id="focusToggle"> Focus: ≥200%</label>
+      </div>
+    </div>
+    <div id="tooltip" class="tooltip" style="opacity:0;"></div>
+    <svg width="960" height="850"></svg>
+  </div>
+  <script src="map3.js"></script>
+</body>
+</html>
