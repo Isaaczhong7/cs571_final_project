@@ -10,6 +10,7 @@
       fill: #979696;
       stroke: #fff;
       stroke-width: 1;
+      transition: fill 0.3s ease;
     }
     .state:hover {
       fill: orange;
@@ -23,23 +24,6 @@
       pointer-events: none;
       font-size: 14px;
       opacity: 0;
-    }
-
-    #showTableBtn {
-        position: absolute;
-        top: 550px;
-        left: 1600px;
-        padding: 8px 16px;
-        background: #0066cc;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        z-index: 10;
-    }
-
-    #showTableBtn:hover {
-        background: #004d99;
     }
 
     #dataTableContainer {
@@ -121,9 +105,64 @@
         border-radius: 4px;
     }
 
-.navbar a:hover {
-  background-color: #575757;
-}
+    .navbar a:hover {
+      background-color: #575757;
+    }
+
+    /* Replace existing .age-selector and #showTableBtn styles with: */
+    #controlsContainer {
+      position: absolute;
+      top: 120px;
+      right: 50px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-end;
+    }
+
+    .age-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .age-btn {
+      padding: 8px 16px;
+      border: 2px solid #ccc;
+      border-radius: 20px;
+      background-color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 150px;
+      text-align: center;
+    }
+
+    .age-btn.active {
+      background-color: #0066cc;
+      color: white;
+      border-color: #0066cc;
+    }
+
+    #showTableBtn {
+      padding: 8px 16px;
+      background: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 150px;
+    }
+
+    #showTableBtn:hover {
+      background: #004d99;
+    }
+
+    /* Remove the original positioning for #showTableBtn */
+
+    .state:hover {
+      fill: orange !important;
+    }
   </style>
 </head>
 <body>
@@ -134,33 +173,40 @@
     <a href="../map3/map3.html">Map3</a>
   </nav>
 
-    <center><h1>Allergies in the US by Age Group</h1></center>
-  <div id="container" class="container">
-      <svg id="map" width="2000" height="1000"></svg>
+  <center><h1>Allergies in the US by Age Group</h1></center>
 
-      <button id="showTableBtn">Show Data Table</button>
-
-      <div id="dataTableContainer" style="display: none;">
-          <h3 align="center">Age Group Data</h3>
-          <table id="ageDataTable">
-              <thead>
-                  <tr>
-                      <th>State</th>
-                      <th>Age 0-13</th>
-                      <th>Age 14-40</th>
-                      <th>Age 41-older</th>
-                  </tr>
-              </thead>
-              <tbody></tbody>
-          </table>
-      </div>
-      
-      <div class="tooltip"></div>
+  <div id="controlsContainer">
+    <div class="age-selector">
+      <button class="age-btn" data-age="Age 0-13">Age 0-13</button>
+      <button class="age-btn" data-age="Age 14-40">Age 14-40</button>
+      <button class="age-btn" data-age="Age 41-older">Age 41-older</button>
     </div>
+    <button id="showTableBtn">Show Data Table</button>
+  </div>
 
-    <script src="map2.js"></script>
+  <div id="container" class="container">
+    <svg id="map" width="2000" height="1000"></svg>
 
+    <button id="showTableBtn">Show Data Table</button>
+
+    <div id="dataTableContainer" style="display: none;">
+        <h3 align="center">Age Group Data</h3>
+        <table id="ageDataTable">
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>Age 0-13</th>
+                    <th>Age 14-40</th>
+                    <th>Age 41-older</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    
+    <div class="tooltip"></div>
+  </div>
+
+  <script src="map2.js"></script>
 </body>
 </html>
-
-
