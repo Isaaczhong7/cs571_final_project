@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>US Map + Allergy Bar Chart</title>
+
+  <!-- D3 & TopoJSON -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v3.min.js"></script>
+
   <style>
-    .state {
-      fill: #1886e0;
+    /* --- Map styles --- */
+    .state {                    /* no default fill → no blue flash */
       stroke: #fff;
       stroke-width: 1;
     }
     .state:hover {
       fill: orange;
     }
+
+    /* --- Tooltip --- */
     .tooltip {
       position: absolute;
       background: #333;
@@ -24,89 +29,108 @@
       font-size: 14px;
       opacity: 0;
     }
-    .bar {
-      fill: steelblue;
-    }
-    .bar:hover {
-      fill: orange;
-    }
 
-    body {
-      margin: 0;
-      justify-content: center; 
-      align-items: flex-start; 
-      min-height: 100vh;
-    }
+    /* --- Bars --- */
+    .bar { fill: steelblue; }
+    .bar:hover { fill: orange; }
 
+    /* --- Layout --- */
+    body { margin: 0; min-height: 100vh; }
     .container {
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: auto auto;
-      grid-gap: 20px;
+      gap: 20px;
       justify-items: center;
       align-items: start;
       padding: 40px;
-      border: 2px solid black;
+      border: 2px solid #000;
     }
+    #map { grid-column: 1 / span 2; }
 
-    #map {
-      grid-column: 1 / span 2;
-    }
-
-    h1{
-      justify-content: center; 
-    }
+    /* --- Navbar --- */
     .navbar {
-        width: 100%;
-        background-color: #484646;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        gap: 30px;
-        padding: 14px 0;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
+      width: 100%;
+      background-color: #484646;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 14px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
-
     .navbar a {
-        color: white;
-        text-decoration: none;
-        font-size: 18px;
-        padding: 8px 16px;
-        border-radius: 4px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+      padding: 8px 16px;
+      border-radius: 4px;
     }
-
-    .navbar a:hover {
-      background-color: #575757;
-    }
+    .navbar a:hover { background-color: #575757; }
   </style>
 </head>
+
 <body>
+  <!-- Navbar -->
   <nav class="navbar">
     <a href="../index.html">Home</a>
     <a href="../map1/map1.html">Map1</a>
     <a href="../map2/map2.html">Map2</a>
     <a href="../map3/map3.html">Map3</a>
   </nav>
-  
-      <center><h1>Allergies That Cause Anaphylactic Reactions</h1></center>
+
+  <center><h1>Allergies That Cause Anaphylactic Reactions</h1></center>
+
   <div id="container" class="container">
+    <!-- legend goes here -->
     <div id="legendContainer" style="grid-column: 1 / span 2; margin-bottom: 10px;"></div>
 
+    <!-- region filter — now all four US Census regions -->
+    <div class="controls">
+      <label for="regionFilter">Region:</label>
+      <select id="regionFilter">
+        <option value="all">All</option>
+        <option value="Northeast">Northeast</option>
+        <option value="Midwest">Midwest</option>
+        <option value="South">South</option>
+        <option value="West">West</option>
+      </select> 
+      <label for="allergenFilter">Allergen:</label>
+      <select id="allergenFilter">
+        <option value="Eggs">Eggs</option>
+        <option value="Peanuts">Peanuts</option>
+        <option value="Shellfish">Shellfish</option>
+        <option value="Seeds">Seeds</option>
+        <option value="Other">Other</option>
+      </select>
+        <label>
+    <input type="checkbox" id="pollenCheckbox">
+    Show Pollen Score
+  </label>
+    </div>
+
+    <!-- map -->
     <svg id="map" width="1200" height="700"></svg>
+
+    <!-- bar chart -->
     <div id="barWrapper">
-        <div id="barTitle"></div>
-        <svg id="barchart" width="500" height="300"></svg>
-      </div>
+      <div id="barTitle"></div>
+      <svg id="barchart" width="500" height="300"></svg>
+    </div>
+
+    <!-- pie chart -->
     <div id="pieWrapper">
-        <div id="pieTitle"></div>
-        <svg id="piechart" width="500" height="300"></svg>
-      </div>
+      <div id="pieTitle"></div>
+      <svg id="piechart" width="500" height="300"></svg>
+    </div>
+
+    <!-- shared tooltip -->
     <div class="tooltip"></div>
   </div>
+
+  <!-- main script -->
   <script src="map1.js"></script>
 </body>
 </html>
-
 
