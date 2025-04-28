@@ -67,6 +67,16 @@
       border-radius: 4px;
     }
     .navbar a:hover { background-color: #575757; }
+
+    .controls {
+    grid-column: 1 / span 2;    /* span across full width */
+    display: flex;
+    justify-content: center;    /* center horizontally */
+    align-items: center;        /* center vertically */
+    gap: 20px;                  /* space between filters */
+    margin-bottom: 20px;        /* little space below */
+    flex-wrap: wrap;            /* allow wrap if small screen */
+  }
   </style>
 </head>
 
@@ -82,10 +92,6 @@
   <center><h1>Allergies That Cause Anaphylactic Reactions</h1></center>
 
   <div id="container" class="container">
-    <!-- legend goes here -->
-    <div id="legendContainer" style="grid-column: 1 / span 2; margin-bottom: 10px;"></div>
-
-    <!-- region filter — now all four US Census regions -->
     <div class="controls">
       <label for="regionFilter">Region:</label>
       <select id="regionFilter">
@@ -103,14 +109,15 @@
         <option value="Seeds">Seeds</option>
         <option value="Other">Other</option>
       </select>
-        <label>
-    <input type="checkbox" id="pollenCheckbox">
-    Show Pollen Score
-  </label>
+      <label>
+        <input type="checkbox" id="pollenCheckbox">
+        Show Pollen Score
+      </label>
     </div>
 
     <!-- map -->
     <svg id="map" width="1200" height="700"></svg>
+    <div id="legendContainer" style="grid-column: 1 / span 2; margin-bottom: 10px;"></div>
 
     <!-- bar chart -->
     <div id="barWrapper">
