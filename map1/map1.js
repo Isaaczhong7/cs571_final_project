@@ -60,8 +60,14 @@ Promise.all([
   d3.csv("../dataset/pie_allergy_data.csv", d => {
     ["Eggs","Peanuts","Shellfish","Seeds","Other"].forEach(k => d[k] = +d[k]);
     return d;
+  }),
+  d3.csv("../dataset/total_pollen_score_ranking.csv", d => {
+    d.Score = +d.Score;
+    d.Lat = +d.Lat;
+    d.Lon = +d.Lon;
+    return d;
   })
-]).then(([us, csv]) => {
+]).then(([us, csv, cityCsv]) => {
 
   /* lookup table:  state → { Eggs:…, Peanuts:…, … } */
   const stateData = Object.fromEntries(csv.map(d => [d.State, d]));
@@ -74,12 +80,34 @@ Promise.all([
       .attr("class","state")
       .attr("d", path)
       .on("mouseover", showTooltip)
+      .on("mousemove", showTooltip)
       .on("mouseout", () => tooltip.transition().duration(500).style("opacity",0))
       .on("click", (evt,d) => {
         const name = d.properties.name;
         const data = stateData[name];
         if (data) { drawBarChart(name,data); drawPieChart(name,data); }
       });
+
+  const cityColor = d3.scaleLinear()
+  .domain([50, 100])  // Adjust based on your actual score range
+  .range(["lightblue", "darkred"]);
+
+  const cityCircles = svg.selectAll("circle.city")
+  .data(cityCsv)
+  .enter().append("circle")
+    .attr("class", "city")
+    .attr("cx", d => projection([d.Lon, d.Lat])[0])
+    .attr("cy", d => projection([d.Lon, d.Lat])[1])
+    .attr("r", 5)
+    .attr("fill", d => cityColor(d.Score))
+    .attr("stroke", "black")
+    .attr("stroke-width", 0.5)
+    .attr("opacity", 0.8)
+    .on("mouseover", showTooltip)
+    .on("mousemove", showTooltip);
+
+cityCircles.append("title")
+    .text(d => `${d.City}, ${d.State}: ${d.Score}`);
 
   /* first draw */
   updateChoropleth();
@@ -90,32 +118,30 @@ Promise.all([
   allergenSel.on("change", () => { updateChoropleth(); buildLegend(); });
   pollenCheckbox.on("change", () => { updateChoropleth(); buildLegend(); });
 
-  // function updateChoropleth(){
-  //   const allergen = allergenSel.property("value");          
-  //   const maxVal   = d3.max(csv, d => d[allergen]);
-  //   const color = d3.scaleSequential([0,maxVal], ramp);
-
-  //   stateShapes
-  //     .attr("fill", d => {
-  //       const row = stateData[d.properties.name];
-  //       return row ? color(row[allergen]) : missingColor;
-  //     });
-  // }
-
+ 
   function updateChoropleth() {
     const usePollen = pollenCheckbox.property("checked");
     const allergen  = allergenSel.property("value");
   
     if (usePollen) {
-      const maxVal = d3.max(Object.values(pollenStateData));
-      const color = d3.scaleSequential([0, maxVal], ramp);
+      // States greyed out
+      stateShapes.attr("fill", missingColor);
   
-      stateShapes.attr("fill", d => {
-        const score = pollenStateData[d.properties.name];
-        return score !== undefined ? color(score) : missingColor;
-      });
+      // Color cities based on pollen score
+      const maxVal = d3.max(cityCsv, d => d.Score);
+      const cityColor = d3.scaleLinear()
+        .domain([50, 100])
+        .range(["lightblue", "darkred"]);
+  
+      cityCircles
+        .attr("fill", d => cityColor(d.Score))
+        .attr("display", d => {
+          const currentRegion = regionSel.property("value");
+          return currentRegion === "all" || (regionMap[currentRegion] && regionMap[currentRegion].includes(d.State)) ? null : "none";
+        });
   
     } else {
+      // Color states based on selected allergen
       const maxVal = d3.max(csv, d => d[allergen]);
       const color = d3.scaleSequential([0, maxVal], ramp);
   
@@ -123,19 +149,21 @@ Promise.all([
         const row = stateData[d.properties.name];
         return row ? color(row[allergen]) : missingColor;
       });
+  
+      // Hide city circles if not using pollen score
+      cityCircles.attr("display", "none");
     }
   }
   
 
   function filterByRegion() {
     const choice = this.value;
-
+  
     barSvg.selectAll("*").remove();
     barTitle.selectAll("*").remove();
-    const pieContainer = d3.select("#piechart");
-    const titleContainer = d3.select("#pieTitle");
-    pieContainer.selectAll("*").remove();       // clear previous chart
-    titleContainer.selectAll("*").remove();     // clear previous title
+    pieContainer.selectAll("*").remove();
+    titleContainer.selectAll("*").remove();
+  
     stateShapes.style("display", d =>
       choice === "all" ||
       (regionMap[choice] && regionMap[choice].includes(d.properties.name))
@@ -143,222 +171,124 @@ Promise.all([
         : "none"
     );
   
-    // 🔑  repaint the map & legend in whatever mode (allergen or pollen)
+    cityCircles.style("display", d =>
+      choice === "all" ||
+      (regionMap[choice] && regionMap[choice].includes(d.State))
+        ? null
+        : "none"
+    );
+  
     updateChoropleth();
     buildLegend();
   }
-  function showTooltip(event,d){
-    const name    = d.properties.name;
-    const row     = stateData[name];
-    const allergen= allergenSel.property("value");
-    tooltip.transition().duration(200).style("opacity",0.9);
-    tooltip.html(
-      `<strong>${name}</strong><br/>` +
-      (row
-         ? `${allergen}: ${(row[allergen]*100).toFixed(1)}%`
-         : "No data"))
-      .style("left", event.pageX+10+"px")
-      .style("top",  event.pageY-20+"px");
+
+  
+  function showTooltip(event, d) {
+    const usePollen = pollenCheckbox.property("checked");
+    const allergen  = allergenSel.property("value");
+  
+    tooltip.transition().duration(200).style("opacity", 0.9);
+  
+    if (d.City) {
+      // d is a city
+      if (usePollen) {
+        // Only show city info if pollen score mode is ON
+        tooltip.html(
+          `<strong>${d.City}, ${d.State}</strong><br/>` +
+          `Rank: ${d.Rank}<br/>` +
+          `Total Pollen Score: ${d.Score.toFixed(2)}`
+        );
+      } else {
+        // Otherwise hide tooltip for cities
+        tooltip.style("opacity", 0);
+      }
+    } else {
+      // d is a state
+      const name = d.properties.name;
+      const row  = stateData[name];
+  
+      tooltip.html(
+        `<strong>${name}</strong>` +
+        (usePollen
+          ? ""  // only show state name when in pollen mode
+          : (row ? `<br/>${allergen}: ${(row[allergen]*100).toFixed(1)}%` : "<br/>No data"))
+      );
+    }
+  
+    tooltip
+      .style("left", event.pageX + 10 + "px")
+      .style("top", event.pageY - 20 + "px");
   }
-
-
-
+  
 
 function buildLegend() {
   legendDiv.selectAll("*").remove();
-  const w=260, h=50;
-  const svgLeg = legendDiv.append("svg").attr("width",w).attr("height",h);
+  const w = 260, h = 50;
+  const svgLeg = legendDiv.append("svg").attr("width", w).attr("height", h);
 
   const usePollen = pollenCheckbox.property("checked");
-  const allergen  = allergenSel.property("value");
+  const allergen = allergenSel.property("value");
 
   svgLeg.append("text")
     .attr("x", w/2).attr("y", 14)
     .attr("text-anchor", "middle")
     .style("font-weight", "bold")
-    .text(usePollen ? "Pollen Score" : `${allergen} (%)`);
+    .text(usePollen ? "City Pollen Score" : `${allergen} (%)`);
 
-  // const defs = svgLeg.append("defs");
   const lg = svgLeg.append("linearGradient").attr("id", "lg");
-  lg.selectAll("stop").data(d3.range(0,1.01,0.1))
-    .enter().append("stop")
-      .attr("offset", d => d)
-      .attr("stop-color", d => ramp(d));
-  svgLeg.append("rect")
-    .attr("x",20).attr("y",22).attr("width",200).attr("height",10)
-    .attr("fill","url(#lg)");
+  
+  if (usePollen) {
+    // Legend for City pollen color
+    const cityColor = d3.scaleLinear()
+      .domain([0, 1])
+      .range(["lightblue", "darkred"]);
+    
+    lg.selectAll("stop").data(d3.range(0,1.01,0.1))
+      .enter().append("stop")
+        .attr("offset", d => d)
+        .attr("stop-color", d => cityColor(d));
 
-  const maxVal = usePollen
-    ? d3.max(Object.values(pollenStateData))
-    : d3.max(csv, d => d[allergen]);
+    svgLeg.append("rect")
+      .attr("x",20).attr("y",22).attr("width",200).attr("height",10)
+      .attr("fill","url(#lg)");
 
-  const scale = d3.scaleLinear().domain([0, maxVal]).range([20,220]);
-  svgLeg.selectAll("text.tick")
-    .data([0, maxVal/2, maxVal])
-    .enter().append("text")
-      .attr("class", "tick")
-      .attr("x", d => scale(d)).attr("y", 45)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "10px")
-      .text(d => usePollen ? d.toFixed(0) : (d*100).toFixed(0) + "%");
+    const scale = d3.scaleLinear().domain([50, 100]).range([20,220]);
+    svgLeg.selectAll("text.tick")
+      .data([50, 75, 100])
+      .enter().append("text")
+        .attr("class", "tick")
+        .attr("x", d => scale(d))
+        .attr("y", 45)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "10px")
+        .text(d => d);
+
+  } else {
+    // Legend for state allergen color
+    lg.selectAll("stop").data(d3.range(0,1.01,0.1))
+      .enter().append("stop")
+        .attr("offset", d => d)
+        .attr("stop-color", d => ramp(d));
+
+    svgLeg.append("rect")
+      .attr("x",20).attr("y",22).attr("width",200).attr("height",10)
+      .attr("fill","url(#lg)");
+
+    const maxVal = d3.max(csv, d => d[allergen]);
+    const scale = d3.scaleLinear().domain([0, maxVal]).range([20,220]);
+    svgLeg.selectAll("text.tick")
+      .data([0, maxVal/2, maxVal])
+      .enter().append("text")
+        .attr("class", "tick")
+        .attr("x", d => scale(d))
+        .attr("y", 45)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "10px")
+        .text(d => (d*100).toFixed(0) + "%");
+  }
 }
+
 });
-
-
-// Load city allergy scores with coordinates
-d3.csv("../dataset/total_pollen_score_ranking.csv").then(cityData => {
-  cityData.forEach(d => {
-    d.Score = +d.Score;
-    d.Rank = +d.Rank;
-    d.Lat = +d.Lat;
-    d.Lon = +d.Lon;
-  });
-
-// Group cities by State
-const grouped = d3.group(cityData, d => d.State);
-
-// Calculate average pollen score per state
-grouped.forEach((cities, state) => {
-  pollenStateData[state] = d3.mean(cities, d => d.Score);
-});
-
-// Now pollenStateData is ready for choropleth
-const regionPollenData = {};     // { Midwest: …, South: …, … }
-
-for (const [region, states] of Object.entries(regionMap)) {
-  // take only the states that have pollen data
-  const withData = states.filter(s => pollenStateData[s] !== undefined);
-  regionPollenData[region] = d3.mean(withData, s => pollenStateData[s]);
-}
-
-updateChoropleth();
-buildLegend();
-
-  // Append city circles after map is drawn
-  d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(us => {
-    const states = topojson.feature(us, us.objects.states).features;
-
-    svg.selectAll("path")
-      .data(states)
-      .enter()
-      .append("path")
-      .attr("d", path)
-      .attr("class", "state")
-      .on("mouseover", function (event, d) {
-        tooltip.transition().duration(200).style("opacity", 0.9);
-        tooltip.html(d.properties.name)
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 20) + "px");
-      })
-      .on("mouseout", function () {
-        tooltip.transition().duration(500).style("opacity", 0);
-      })
-      .on("click", (event, d) => {
-        const stateName = d.properties.name;
-        if (barData[stateName]) drawBarChart(stateName, barData[stateName]);
-        if (pieData[stateName]) drawPieChart(stateName, pieData[stateName]);
-      });
-
-    // Draw circles for cities
-    svg.selectAll("circle.city")
-      .data(cityData)
-      .enter()
-      .append("circle")
-      .attr("class", "city")
-      .attr("cx", d => {
-        const coords = projection([d.Lon, d.Lat]);
-        return coords ? coords[0] : null;
-      })
-      .attr("cy", d => {
-        const coords = projection([d.Lon, d.Lat]);
-        return coords ? coords[1] : null;
-      })
-      .attr("r", 5)
-      .attr("fill", d => colorScale(d.Score))
-      .attr("stroke", "white")
-      .attr("stroke-width", 1.5)
-      .on("mouseover", function (event, d) {
-        tooltip.transition().duration(200).style("opacity", 0.9);
-        tooltip.html(
-          `<strong>${d.City}, ${d.State}</strong><br>
-           Rank: ${d.Rank}<br>
-           Total Pollen Score: ${d.Score}`
-        )
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 20) + "px");
-      })
-      .on("mouseout", function () {
-        tooltip.transition().duration(500).style("opacity", 0);
-      });
-      drawLegend();
-  });
-});
-function drawLegend() {
-  const legendWidth = 300;
-  const legendHeight = 10;
-  const legendContainer = d3.select("#legendContainer");
-
-  const legendSvg = legendContainer
-    .append("svg")
-    .attr("width", legendWidth + 100)
-    .attr("height", 70)
-    .style("margin-top", "10px");
-
-  // Title
-  legendSvg.append("text")
-    .attr("x", (legendWidth + 100) / 2)
-    .attr("y", 15)
-    .text("Total Pollen Score")
-    .style("font-size", "16px")
-    .style("font-weight", "bold")
-    .style("text-anchor", "middle");
-
-  // Gradient
-  const defs = legendSvg.append("defs");
-  const linearGradient = defs.append("linearGradient")
-    .attr("id", "legend-gradient");
-
-  linearGradient.selectAll("stop")
-    .data([
-      { offset: "0%", color: "#e6261c" },  // Better
-      { offset: "50%", color: "#f7590a" }, // Average
-      { offset: "100%", color: "#1a9850" } // Worse
-    ])
-    .enter().append("stop")
-    .attr("offset", d => d.offset)
-    .attr("stop-color", d => d.color);
-
-  // Gradient bar
-  legendSvg.append("rect")
-    .attr("x", 50)
-    .attr("y", 30)
-    .attr("width", legendWidth)
-    .attr("height", legendHeight)
-    .style("fill", "url(#legend-gradient)");
-
-  // Labels
-  legendSvg.append("text")
-    .attr("x", 40)
-    .attr("y", 28)
-    .text("Worse")
-    .style("fill", "#d73027")
-    .style("font-size", "12px");
-
-  legendSvg.append("text")
-    .attr("x", legendWidth / 2 + 50)
-    .attr("y", 28)
-    .text("Average")
-    .style("fill", "#fdae61")
-    .style("font-size", "12px")
-    .style("text-anchor", "middle");
-
-  legendSvg.append("text")
-    .attr("x", legendWidth + 60)
-    .attr("y", 28)
-    .text("Better")
-    .style("fill", "#1a9850")
-    .style("font-size", "12px");
-}
 
 
 function drawBarChart(state, data) {
