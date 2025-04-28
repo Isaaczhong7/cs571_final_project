@@ -233,7 +233,7 @@ function buildLegend() {
     .attr("x", w/2).attr("y", 14)
     .attr("text-anchor", "middle")
     .style("font-weight", "bold")
-    .text(usePollen ? "City Pollen Score" : `${allergen} (%)`);
+    .text(usePollen ? "Top 100 Metro City Pollen Score" : `${allergen} (%)`);
 
   const lg = svgLeg.append("linearGradient").attr("id", "lg");
   
