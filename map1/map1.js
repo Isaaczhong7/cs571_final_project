@@ -211,7 +211,7 @@ cityCircles.append("title")
         `<strong>${name}</strong>` +
         (usePollen
           ? ""  // only show state name when in pollen mode
-          : (row ? `<br/>${allergen}: ${(row[allergen]*100).toFixed(1)}%` : "<br/>No data"))
+          : (row ? `<br/>${allergen}: ${(row[allergen])}%` : "<br/>No data"))
       );
     }
   
@@ -284,7 +284,7 @@ function buildLegend() {
         .attr("y", 45)
         .attr("text-anchor", "middle")
         .attr("font-size", "10px")
-        .text(d => (d*100).toFixed(0) + "%");
+        .text(d => d );
   }
 }
 
