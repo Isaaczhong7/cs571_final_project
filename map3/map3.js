@@ -38,6 +38,7 @@ const regionMap = {
 };
 
 let allStates = [];
+let highFocusStates = [];
 
 Promise.all([
   d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"),
@@ -45,6 +46,7 @@ Promise.all([
 ]).then(([us, data]) => {
   const nameToChange = new Map(data.map(d => [d.State, +d.percent_change]));
   allStates = data.map(d => d.State).sort();
+  highFocusStates = data.filter(d => +d.percent_change >= 200).map(d => d.State);
 
   const states = topojson.feature(us, us.objects.states).features;
 
@@ -63,14 +65,22 @@ Promise.all([
     regionSelect.append("option").attr("value", region).text(region);
   });
 
-  allStates.forEach(state => {
-    stateSelect.append("option").attr("value", state).text(state);
-  });
+  function updateStateDropdown(list) {
+    stateSelect.selectAll("option:not([value='All'])").remove();
+    list.forEach(state => {
+      stateSelect.append("option").attr("value", state).text(state);
+    });
+  }
+
+  updateStateDropdown(allStates); // default view
 
   function updateMap() {
     const selectedRegion = regionSelect.property("value");
     const selectedState = stateSelect.property("value");
     const focusMode = focusToggle.property("checked");
+
+    const validStates = focusMode ? highFocusStates : allStates;
+    updateStateDropdown(validStates);
 
     svg.selectAll(".germ").remove();
 
@@ -80,14 +90,15 @@ Promise.all([
         const state = stateIdToName.get(fips);
         const value = nameToChange.get(state);
 
-        if (focusMode) return value >= 200 ? color(value) : "#ddd";
-
+        const inFocus = focusMode ? value >= 200 : true;
         const inRegion = selectedRegion === "All" || regionMap[selectedRegion]?.includes(state);
         const isState = selectedState === "All" || selectedState === state;
 
-        const isVisible = (selectedRegion === "All" && selectedState === "All") ||
+        const isVisible = inFocus && (
+          (selectedRegion === "All" && selectedState === "All") ||
           (selectedRegion !== "All" && inRegion && selectedState === "All") ||
-          (selectedState !== "All" && selectedState === state);
+          (selectedState !== "All" && selectedState === state)
+        );
 
         return isVisible ? (value != null ? color(value) : "#ccc") : "#ddd";
       })
@@ -96,14 +107,15 @@ Promise.all([
         const state = stateIdToName.get(fips);
         const value = nameToChange.get(state);
 
-        if (focusMode) return value >= 200 ? "all" : "none";
-
+        const inFocus = focusMode ? value >= 200 : true;
         const inRegion = selectedRegion === "All" || regionMap[selectedRegion]?.includes(state);
         const isState = selectedState === "All" || selectedState === state;
 
-        const isHoverable = (selectedRegion === "All" && selectedState === "All") ||
+        const isHoverable = inFocus && (
+          (selectedRegion === "All" && selectedState === "All") ||
           (selectedRegion !== "All" && inRegion && selectedState === "All") ||
-          (selectedState !== "All" && selectedState === state);
+          (selectedState !== "All" && selectedState === state)
+        );
 
         return isHoverable ? "all" : "none";
       });
@@ -128,29 +140,9 @@ Promise.all([
     }
   }
 
-  regionSelect.on("change", () => {
-    if (!focusToggle.property("checked")) {
-      stateSelect.property("value", "All");
-      updateMap();
-    }
-  });
-
-  stateSelect.on("change", () => {
-    if (!focusToggle.property("checked")) {
-      if (stateSelect.property("value") !== "All") {
-        regionSelect.property("value", "All");
-      }
-      updateMap();
-    }
-  });
-
-  focusToggle.on("change", () => {
-    if (focusToggle.property("checked")) {
-      regionSelect.property("value", "All");
-      stateSelect.property("value", "All");
-    }
-    updateMap();
-  });
+  regionSelect.on("change", () => updateMap());
+  stateSelect.on("change", () => updateMap());
+  focusToggle.on("change", () => updateMap());
 
   updateMap();
 
@@ -166,11 +158,11 @@ Promise.all([
 
       const inRegion = selectedRegion === "All" || regionMap[selectedRegion]?.includes(state);
       const isState = selectedState === "All" || selectedState === state;
-      const isVisible = !focusMode
-        ? (selectedRegion === "All" && selectedState === "All") ||
-          (selectedRegion !== "All" && inRegion && selectedState === "All") ||
-          (selectedState !== "All" && selectedState === state)
-        : (value >= 200);
+      const isVisible = (!focusMode && (
+        (selectedRegion === "All" && selectedState === "All") ||
+        (selectedRegion !== "All" && inRegion && selectedState === "All") ||
+        (selectedState !== "All" && selectedState === state)
+      )) || (focusMode && value >= 200);
 
       if (!isVisible) return;
 
@@ -187,6 +179,7 @@ Promise.all([
       tooltip.style("opacity", 0);
     });
 
+  // Legend
   const legendWidth = 200;
   const legendHeight = 10;
 
