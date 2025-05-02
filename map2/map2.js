@@ -51,12 +51,12 @@ Promise.all([
             const stateName = d.properties.name;
 
             if (ageData[stateName]) {
-            tooltip.transition().duration(200).style("opacity", 0.9);
-            tooltip.html(`
-                <div><strong>${stateName}</strong></div>
-                ${ageGroups.map(g => `
-                <div>${g}: ${ageData[stateName][g]}%</div>
-                `).join('')}
+                tooltip.transition().duration(200).style("opacity", 0.9);
+                tooltip.html(`
+                    <div><strong>${stateName}</strong></div>
+                    ${ageGroups.map(g => `
+                    <div>${g}: ${ageData[stateName][g]}%</div>
+                    `).join('')}
             `)
             .style("left", (event.pageX + 10) + "px")
             .style("top", (event.pageY - 20) + "px");
@@ -73,7 +73,27 @@ Promise.all([
            .style("fill", d => {
                 const stateName = d.properties.name;
                 return ageData[stateName] ? colorScales[ageGroup](ageData[stateName][ageGroup]) : "#979696";
-           });
+           })
+
+        svg.selectAll("path")
+           .on("mouseover", function(event, d) {
+                const stateName = d.properties.name;
+
+                if (ageData[stateName]) {
+                    tooltip.transition().duration(200).style("opacity", 0.9);
+                    tooltip.html(`
+                        <div><strong>${stateName}</strong></div>
+                        ${`
+                        <div>${ageGroup}: ${ageData[stateName][ageGroup]}%</div>
+                        `}
+                    `)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 20) + "px");
+                }
+            })
+            .on("mouseout", function() {
+                tooltip.transition().duration(500).style("opacity", 0);
+            });
     }
 
     function resetMapColors() {
@@ -81,6 +101,26 @@ Promise.all([
             .transition()
             .duration(300)
             .style("fill", "#979696");
+
+        svg.selectAll("path")
+            .on("mouseover", function(event, d) {
+                 const stateName = d.properties.name;
+     
+                 if (ageData[stateName]) {
+                     tooltip.transition().duration(200).style("opacity", 0.9);
+                     tooltip.html(`
+                         <div><strong>${stateName}</strong></div>
+                         ${ageGroups.map(g => `
+                         <div>${g}: ${ageData[stateName][g]}%</div>
+                         `).join('')}
+                 `)
+                 .style("left", (event.pageX + 10) + "px")
+                 .style("top", (event.pageY - 20) + "px");
+             }
+         })
+         .on("mouseout", function() {
+             tooltip.transition().duration(500).style("opacity", 0);
+         });
     }
 
     // Add button handlers
