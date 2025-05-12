@@ -10,7 +10,7 @@ Website: https://isaaczhong7.github.io/cs571_final_project/
 Screencast: https://youtu.be/_f_eezYq9tQ?si=_FBVQZUCmXTwD1ms
 <br>
 
-We are handing in our home page, map1, map2, and map3 with their related JS code and HTML files for our project. Also we are included the dataset and the picture asset we used.
+We are handing in our home page, map1, map2, and map3 with their related JS code and HTML files for our project. Also, we have included the dataset and the picture asset we used.
 <be>
 
 **Isaac Zhong**:<br>
